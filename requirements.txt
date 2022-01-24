@@ -1,0 +1,6 @@
+#Packages
+OpenCV-contrib-python==4.5.3.56
+Numpy==1.19.3
+tracker==0.1.1
+collection==0.1.6
+csv23==0.3.2
