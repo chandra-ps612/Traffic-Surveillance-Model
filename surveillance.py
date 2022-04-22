@@ -126,23 +126,23 @@ def postProcess(outputs,img):
     height, width = img.shape[:2]
     boxes = []
     class_ids = []
-    confidences = []
+    confs = []
     detection = []
     for output in outputs:
-        for det in output:
-            scores = det[5:]
-            class_id = np.argmax(scores)
-            confidence = scores[class_id]
+        for detection in output:
+            classes_scores = detection[5:]
+            class_id = np.argmax(classes_scores)
+            conf = detection[4]
             if class_id in required_class_index:
-                if confidence > confThreshold:
-                    w,h = int(det[2]*width) , int(det[3]*height)
-                    x,y = int((det[0]*width)-w/2) , int((det[1]*height)-h/2)
+                if conf > confThreshold:
+                    w,h = int(detection[2]*width) , int(detection[3]*height)
+                    x,y = int((detection[0]*width)-w/2) , int((detection[1]*height)-h/2)
                     boxes.append([x,y,w,h])
                     class_ids.append(class_id)
-                    confidences.append(float(confidence))
+                    confs.append(float(conf))
 
     # Apply Non-Max Suppression
-    indices = cv2.dnn.NMSBoxes(boxes, confidences, confThreshold, nmsThreshold)
+    indices = cv2.dnn.NMSBoxes(boxes, confs, confThreshold, nmsThreshold)
     for i in indices.flatten():
         x, y, w, h = boxes[i]
         # print(x,y,w,h)
@@ -150,7 +150,7 @@ def postProcess(outputs,img):
         name = classes[class_ids[i]]
         detected_classes.append(name)
         # Draw classes and confidence
-        cv2.putText(img,f'{name.upper()} {int(confidences[i]*100)}%', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+        cv2.putText(img,f'{name.upper()} {int(conf[i]*100)}%', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
         # Draw bounding rectangle
         cv2.rectangle(img, (x, y), (x + w, y + h), color, 1)
         detection.append([x, y, w, h, required_class_index.index(class_ids[i])])
